@@ -10,7 +10,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_api_gateway_rest_api" "simple_api" {
   description = "A simple CORS compliant API"
-  name = "SimpleAPI"
+  name        = "SimpleAPI"
   endpoint_configuration {
     types = [
       "REGIONAL"
@@ -19,15 +19,15 @@ resource "aws_api_gateway_rest_api" "simple_api" {
 }
 
 resource "aws_api_gateway_resource" "simple_api_resource" {
-  parent_id = aws_api_gateway_rest_api.simple_api.root_resource_id
-  path_part = "hello"
+  parent_id   = aws_api_gateway_rest_api.simple_api.root_resource_id
+  path_part   = "hello"
   rest_api_id = aws_api_gateway_rest_api.simple_api.arn
 }
 
 resource "aws_api_gateway_method" "hello_apiget_method" {
   api_key_required = false
-  authorization = "NONE"
-  http_method = "GET"
+  authorization    = "NONE"
+  http_method      = "GET"
   // CF Property(Integration) = {
   //   Type = "MOCK"
   //   PassthroughBehavior = "WHEN_NO_MATCH"
@@ -66,7 +66,7 @@ resource "aws_api_gateway_method" "hello_apiget_method" {
 
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.simple_api.arn
-  stage_name = "v1"
+  stage_name  = "v1"
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
@@ -96,24 +96,24 @@ resource "aws_s3_bucket" "s3_bucket" {
 
 resource "aws_s3_bucket_policy" "bucket_policy" {
   policy = jsonencode({
-      Id = "MyPolicy"
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid = "PolicyForCloudFrontPrivateContent"
-          Effect = "Allow"
-          Resource = "${aws_s3_bucket.s3_bucket.arn}/*"
-          Principal = {
-            Service = "cloudfront.amazonaws.com"
-          }
-          Condition = {
-            StringEquals = {
-              AWS:SourceArn = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.cf_distribution.id}"
-            }
-          }
-          Action = "s3:GetObject*"
+    Id      = "MyPolicy"
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "PolicyForCloudFrontPrivateContent"
+        Effect   = "Allow"
+        Resource = "${aws_s3_bucket.s3_bucket.arn}/*"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
         }
-      ]
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" : "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.cf_distribution.id}"
+          }
+        }
+        Action = "s3:GetObject*"
+      }
+    ]
     }
   )
   bucket = aws_s3_bucket.s3_bucket.id
@@ -209,11 +209,11 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
 
 resource "aws_cloudfront_origin_access_control" "cloud_front_origin_access_control" {
   origin_access_control_origin_type = {
-    Description = "Default Origin Access Control"
-    Name = local.stack_name
+    Description                   = "Default Origin Access Control"
+    Name                          = local.stack_name
     OriginAccessControlOriginType = "s3"
-    SigningBehavior = "always"
-    SigningProtocol = "sigv4"
+    SigningBehavior               = "always"
+    SigningProtocol               = "sigv4"
   }
 }
 
